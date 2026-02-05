@@ -73,7 +73,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlinter = { id = "org.jmailen.kotlinter", version = "5.0.1" }
 
 # Build config
-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.3.5" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.7" }
 
 # ShadowJar
 shadowjar = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
