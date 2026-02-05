@@ -18,7 +18,7 @@ serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 # Dependency Injection
-kodein = "org.kodein.di:kodein-di-conf-jvm:7.22.0"
+kodein = "org.kodein.di:kodein-di-conf-jvm:7.30.0"
 
 # Logging
 logback = "ch.qos.logback:logback-classic:1.5.6"
