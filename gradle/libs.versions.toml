@@ -21,7 +21,7 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 kodein = "org.kodein.di:kodein-di-conf-jvm:7.22.0"
 
 # Logging
-logback = "ch.qos.logback:logback-classic:1.5.6"
+logback = "ch.qos.logback:logback-classic:1.5.27"
 kotlinlogging = "io.github.oshai:kotlin-logging-jvm:7.0.14"
 
 # ReactiveX
