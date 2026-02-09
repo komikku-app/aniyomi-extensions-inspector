@@ -37,7 +37,7 @@ jobs:
           arguments: :inspector:shadowJar
 
       - name: Upload Release
-        uses: xresloader/upload-to-github-release@2290df57aa316d1dae840ca57126a33bda98f45f # v1.4.2
+        uses: xresloader/upload-to-github-release@e6ac9c2ff1018fca4464bf2480155faeb66f9bdb # v1.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
