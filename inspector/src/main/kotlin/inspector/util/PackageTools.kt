@@ -80,7 +80,13 @@ object PackageTools {
             handler.dump(errorFile, emptyArray<String>())
         }
 
-        fixJarStackMaps(jarFile)
+        if (jarFile.exists() && jarFile.length() > 0L) {
+            runCatching {
+                fixJarStackMaps(jarFile)
+            }.onFailure { error ->
+                logger.warn(error) { "Failed to fix stack maps for generated jar: ${jarFile.absolutePath}" }
+            }
+        }
     }
 
     /**
