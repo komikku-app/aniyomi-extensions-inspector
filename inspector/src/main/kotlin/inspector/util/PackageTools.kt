@@ -89,29 +89,30 @@ object PackageTools {
      */
     private fun fixJarStackMaps(jarFile: File) {
         val fixedJar = File(jarFile.parent, "${jarFile.nameWithoutExtension}_fixed.jar")
-        JarFile(jarFile).use { jar ->
-            JarOutputStream(FileOutputStream(fixedJar)).use { jos ->
-                jar.entries().asSequence().forEach { entry ->
-                    if (entry.isDirectory) return@forEach
-
-                    jos.putNextEntry(JarEntry(entry.name))
-                    jar.getInputStream(entry).use { input ->
-                        val bytes = input.readBytes()
-                        val fixed =
-                            if (entry.name.endsWith(".class")) {
-                                fixClassStackMaps(bytes)
-                            } else {
-                                bytes
+        try {
+            JarFile(jarFile).use { jar ->
+                JarOutputStream(FileOutputStream(fixedJar)).use { jos ->
+                    jar.entries().asSequence().forEach { entry ->
+                        jos.putNextEntry(JarEntry(entry.name))
+                        if (!entry.isDirectory) {
+                            jar.getInputStream(entry).use { input ->
+                                if (entry.name.endsWith(".class")) {
+                                    jos.write(fixClassStackMaps(input.readBytes()))
+                                } else {
+                                    input.copyTo(jos)
+                                }
                             }
-                        jos.write(fixed)
+                        }
+                        jos.closeEntry()
                     }
-                    jos.closeEntry()
                 }
             }
+            Files.move(fixedJar.toPath(), jarFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        } finally {
+            if (fixedJar.exists()) {
+                fixedJar.delete()
+            }
         }
-
-        jarFile.delete()
-        fixedJar.renameTo(jarFile)
     }
 
     private fun fixClassStackMaps(classBytes: ByteArray): ByteArray {
