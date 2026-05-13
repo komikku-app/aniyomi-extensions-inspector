@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.3.10"
 coroutines = "1.10.1"
 serialization = "1.8.0"
 dex2jar = "2.4.34"
