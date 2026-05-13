@@ -123,7 +123,8 @@ object PackageTools {
                     type2: String,
                 ): String = "java/lang/Object"
             }
-        reader.accept(writer, 0)
+        // Use SKIP_FRAMES to avoid mixing existing (possibly invalid) frames with recomputed ones
+        reader.accept(writer, ClassReader.SKIP_FRAMES)
         return writer.toByteArray()
     }
 
