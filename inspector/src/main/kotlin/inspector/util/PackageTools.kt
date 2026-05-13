@@ -16,13 +16,19 @@ import com.googlecode.dex2jar.tools.BaksmaliBaseDexExceptionHandler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.dongliu.apk.parser.ApkFile
 import net.dongliu.apk.parser.ApkParsers
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import xyz.nulldev.androidcompat.pm.InstalledPackage.Companion.toList
 import xyz.nulldev.androidcompat.pm.toPackageInfo
 import java.io.File
+import java.io.FileOutputStream
 import java.net.URLClassLoader
 import java.nio.file.Files
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 object PackageTools {
@@ -73,6 +79,60 @@ object PackageTools {
             }
             handler.dump(errorFile, emptyArray<String>())
         }
+
+        if (jarFile.exists() && jarFile.length() > 0L) {
+            runCatching {
+                fixJarStackMaps(jarFile)
+            }.onFailure { error ->
+                logger.warn(error) { "Failed to fix stack maps for generated jar: ${jarFile.absolutePath}" }
+            }
+        }
+    }
+
+    /**
+     * dex2jar output often lacks valid StackMapTable attributes, which makes the JVM
+     * reject extension classes built with newer Android toolchains (e.g. minSdk 24).
+     */
+    private fun fixJarStackMaps(jarFile: File) {
+        val fixedJar = File(jarFile.parent, "${jarFile.nameWithoutExtension}_fixed.jar")
+        try {
+            JarFile(jarFile).use { jar ->
+                JarOutputStream(FileOutputStream(fixedJar)).use { jos ->
+                    jar.entries().asSequence().forEach { entry ->
+                        jos.putNextEntry(JarEntry(entry.name))
+                        if (!entry.isDirectory) {
+                            jar.getInputStream(entry).use { input ->
+                                if (entry.name.endsWith(".class")) {
+                                    jos.write(fixClassStackMaps(input.readBytes()))
+                                } else {
+                                    input.copyTo(jos)
+                                }
+                            }
+                        }
+                        jos.closeEntry()
+                    }
+                }
+            }
+            Files.move(fixedJar.toPath(), jarFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        } finally {
+            if (fixedJar.exists()) {
+                fixedJar.delete()
+            }
+        }
+    }
+
+    private fun fixClassStackMaps(classBytes: ByteArray): ByteArray {
+        val reader = ClassReader(classBytes)
+        val writer =
+            object : ClassWriter(ClassWriter.COMPUTE_FRAMES) {
+                override fun getCommonSuperClass(
+                    type1: String,
+                    type2: String,
+                ): String = "java/lang/Object"
+            }
+        // Use SKIP_FRAMES to avoid mixing existing (possibly invalid) frames with recomputed ones
+        reader.accept(writer, ClassReader.SKIP_FRAMES)
+        return writer.toByteArray()
     }
 
     /** A modified version of `xyz.nulldev.androidcompat.pm.InstalledPackage.info` */
