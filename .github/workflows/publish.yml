@@ -40,7 +40,7 @@ jobs:
           ./gradlew :inspector:shadowJar
 
       - name: Upload Release
-        uses: xresloader/upload-to-github-release@e6ac9c2ff1018fca4464bf2480155faeb66f9bdb # v1.6.1
+        uses: xresloader/upload-to-github-release@7c5757a90c0bcf0c0e1741da8f2abd7b85e675d0 # v1.6.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
