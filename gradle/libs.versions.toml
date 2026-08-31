@@ -2,7 +2,7 @@
 kotlin = "2.3.10"
 coroutines = "1.10.1"
 serialization = "1.11.0"
-dex2jar = "2.4.34"
+dex2jar = "2.4.36"
 okhttp = "5.3.2"
 rhino = "1.7.15"
 multiplatform-settings = "1.1.0"
